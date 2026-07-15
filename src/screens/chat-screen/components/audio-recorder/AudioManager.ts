@@ -36,6 +36,7 @@ export const startPlayer = async (path: string, callback: Callback) => {
 
   if (audioRecorderPlayer === undefined) {
     audioRecorderPlayer = new AudioRecorderPlayer();
+    audioRecorderPlayer.setSubscriptionDuration(0.1);
   }
 
   const shouldBeResumed = currentPath === path && currentPosition > 0;
