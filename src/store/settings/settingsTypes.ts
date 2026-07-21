@@ -26,7 +26,6 @@ export interface InstallationUrls {
   webSocketUrl: string;
   baseUrl: string;
 }
-
 export interface SettingsState extends InstallationUrls {
   uiFlags: {
     isSettingUrl: boolean;
@@ -35,21 +34,4 @@ export interface SettingsState extends InstallationUrls {
   };
   notificationSettings: NotificationSettings | null;
   localeValue: string;
-}
-
-export interface PushPayload {
-  subscription_type: string;
-  subscription_attributes: {
-    deviceName: string;
-    devicePlatform: string;
-    apiLevel: string;
-    brandName: string;
-    buildNumber: string;
-    push_token: string;
-    device_id: string;
-  };
-}
-
-export interface RemoveDevicePayload {
-  push_token: string;
 }

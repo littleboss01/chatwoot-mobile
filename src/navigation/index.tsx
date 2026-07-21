@@ -1,6 +1,5 @@
 import React, { useCallback, useRef } from 'react';
 import { ActivityIndicator, Linking, StyleSheet, View } from 'react-native';
-import messaging from '@react-native-firebase/messaging';
 import { getStateFromPath } from '@react-navigation/native';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { useFonts } from 'expo-font';
@@ -11,7 +10,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { AppTabs } from './tabs/AppTabs';
 import i18n from 'i18n';
 import { navigationRef } from '@/utils/navigationUtils';
-import { findConversationLinkFromPush, findNotificationFromFCM } from '@/utils/pushUtils';
 import { extractConversationIdFromUrl } from '@/utils/conversationUtils';
 import { useAppSelector } from '@/hooks';
 import { selectInstallationUrl, selectLocale } from '@/store/settings/settingsSelectors';
@@ -19,7 +17,6 @@ import { SSO_CALLBACK_URL } from '@/constants';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { RefsProvider } from '@/context';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { transformNotification } from '@/utils/camelCaseKeys';
 import { SsoUtils } from '@/utils/ssoUtils';
 import { useAppDispatch } from '@/hooks';
 import Inter40020 from '@/assets/fonts/Inter-400-20.ttf';
@@ -100,7 +97,7 @@ export const AppNavigationContainer = () => {
         ],
       };
     },
-    // getInitialURL: App starting up from deep link - handles SSO callbacks and push notifications
+    // getInitialURL: App starting up from a deep link - handles SSO callbacks.
     async getInitialURL() {
       // Check if app was opened from a deep link
       const url = await Linking.getInitialURL();
@@ -116,22 +113,9 @@ export const AppNavigationContainer = () => {
         return url;
       }
 
-      // getInitialNotification: When the application is opened from a quit state.
-      const message = await messaging().getInitialNotification();
-      if (message) {
-        const notification = findNotificationFromFCM({ message });
-        const camelCaseNotification = transformNotification(notification);
-        const conversationLink = findConversationLinkFromPush({
-          notification: camelCaseNotification,
-          installationUrl,
-        });
-        if (conversationLink) {
-          return conversationLink;
-        }
-      }
       return undefined;
     },
-    // subscribe: App backgrounded, receives deep link - handles SSO callbacks and push notifications
+    // subscribe: App backgrounded, receives deep links and handles SSO callbacks.
     subscribe(listener: (arg0: string) => void) {
       const onReceiveURL = ({ url }: { url: string }) => {
         // Handle SSO callback - App backgrounded, receives deep link
@@ -147,25 +131,8 @@ export const AppNavigationContainer = () => {
       // Listen to incoming links from deep linking
       const subscription = Linking.addEventListener('url', onReceiveURL);
 
-      //onNotificationOpenedApp: When the application is running, but in the background.
-      const unsubscribeNotification = messaging().onNotificationOpenedApp(message => {
-        if (message) {
-          const notification = findNotificationFromFCM({ message });
-          const camelCaseNotification = transformNotification(notification);
-
-          const conversationLink = findConversationLinkFromPush({
-            notification: camelCaseNotification,
-            installationUrl,
-          });
-          if (conversationLink) {
-            listener(conversationLink);
-          }
-        }
-      });
-
       return () => {
         subscription.remove();
-        unsubscribeNotification();
       };
     },
   };

@@ -18,6 +18,7 @@ import {
   transformNotificationRemovedResponse,
 } from './camelCaseKeys';
 import { addNotification } from '@/store/notification/notificationSlice';
+import { displayAndroidNotification } from '@/utils/pushUtils';
 import { setCurrentUserAvailability } from '@/store/auth/authSlice';
 import { removeNotification } from '@/store/notification/notificationSlice';
 import {
@@ -111,6 +112,7 @@ class ActionCableConnector extends BaseActionCableConnector {
   onNotificationCreated = (data: NotificationCreatedResponse) => {
     const notification: NotificationCreatedResponse = transformNotificationCreatedResponse(data);
     store.dispatch(addNotification(notification));
+    void displayAndroidNotification(notification.notification);
   };
 
   onNotificationRemoved = (data: NotificationRemovedResponse) => {

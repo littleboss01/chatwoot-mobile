@@ -1,17 +1,13 @@
 import * as Sentry from '@sentry/react-native';
-import messaging from '@react-native-firebase/messaging';
 
 import Constants from 'expo-constants';
 import App from './src/app';
-import { displayAndroidBackgroundNotification } from './src/utils/pushUtils';
 
 // TODO: It is a temporary fix to fix the reanimated logger issue
 // Ref: https://github.com/gorhom/react-native-bottom-sheet/issues/1983
 // https://github.com/dohooo/react-native-reanimated-carousel/issues/706
 import './reanimatedConfig';
 // import './wdyr';
-
-messaging().setBackgroundMessageHandler(displayAndroidBackgroundNotification);
 
 const isStorybookEnabled = Constants.expoConfig?.extra?.eas?.storybookEnabled;
 

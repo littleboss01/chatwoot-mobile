@@ -1,37 +1,37 @@
-# Android Background Notifications and Theme Implementation Plan
+# Android ActionCable Notifications and Theme Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Show Android background Chatwoot notifications promptly and add persisted light/dark appearance switching to Settings.
+**Goal:** Show Android notifications from a live ActionCable connection while backgrounded and add persisted light/dark appearance switching to Settings.
 
-**Architecture:** The app entry point registers a background FCM handler that invokes a Notifee-based push utility. Redux owns the persisted theme preference, and a typed React hook supplies Settings with semantic colors instead of a global mutable Tailwind theme.
+**Architecture:** The ActionCable connector invokes a Notifee-based local notification utility when the app is backgrounded. Redux owns the persisted theme preference, and a typed React hook supplies Settings with semantic colors instead of a global mutable Tailwind theme.
 
-**Tech Stack:** Expo 53, React Native 0.79, TypeScript, Redux Toolkit, redux-persist, React Native Firebase Messaging, Notifee.
+**Tech Stack:** Expo 53, React Native 0.79, TypeScript, Redux Toolkit, redux-persist, ActionCable, Notifee.
 
 ## Global Constraints
 
-- Android notification handling covers backgrounded and terminated app states only.
-- Do not display a local notification for an FCM message with a native notification payload.
+- Android notification handling is best-effort while the app process is alive.
+- Do not use Firebase, FCM, or Google configuration.
 - Preserve the existing `light | dark | system` type, but only write `light` or `dark` from the new control.
 - Do not run build, test, lint, dependency-install, or environment-check commands unless the user requests them.
 
 ---
 
-### Task 1: Android background notification delivery
+### Task 1: Android ActionCable notification delivery
 
 **Files:**
-- Modify: `App.tsx`
 - Modify: `app.config.ts`
+- Modify: `src/utils/actionCable.ts`
 - Modify: `src/utils/pushUtils.ts`
 
 **Interfaces:**
-- Consumes: Firebase `RemoteMessage` data under `data.payload` or `data.notification`.
-- Produces: `displayAndroidBackgroundNotification(message): Promise<void>`.
+- Consumes: ActionCable `NotificationCreatedResponse` events.
+- Produces: `displayAndroidNotification(notification): Promise<void>`.
 
-- [x] Register `messaging().setBackgroundMessageHandler` in `App.tsx` at module load.
+- [x] Remove Firebase and FCM initialization from the Android application.
 - [x] Declare Android notification permission in `app.config.ts`.
-- [x] Add a Notifee notification channel and a display function in `pushUtils.ts`.
-- [x] Parse valid Chatwoot notifications, use `pushMessageTitle` as the visible message body, and capture unexpected failures with Sentry.
+- [x] Add a Notifee notification channel and an Android permission request in `pushUtils.ts`.
+- [x] Display `notification.created` events using `pushMessageTitle` when the app is not active and capture unexpected failures with Sentry.
 
 ### Task 2: Persisted settings appearance
 

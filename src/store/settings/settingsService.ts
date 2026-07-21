@@ -3,8 +3,6 @@ import { apiService } from '@/services/APIService';
 import type {
   NotificationSettings,
   NotificationSettingsPayload,
-  PushPayload,
-  RemoveDevicePayload,
 } from './settingsTypes';
 
 export class SettingsService {
@@ -34,15 +32,4 @@ export class SettingsService {
     return response.data;
   }
 
-  static async saveDeviceDetails(payload: PushPayload): Promise<{ fcmToken: string }> {
-    const response = await apiService.post<{ fcmToken: string }>(
-      'notification_subscriptions',
-      payload,
-    );
-    return response.data;
-  }
-
-  static async removeDevice(payload: RemoveDevicePayload): Promise<void> {
-    await apiService.delete('notification_subscriptions', { data: payload });
-  }
 }

@@ -17,7 +17,6 @@ interface SettingsState {
   webSocketUrl: string;
   theme: Theme;
   version: string;
-  pushToken: string;
 }
 const initialState: SettingsState = {
   baseUrl: 'app.chatwoot.com',
@@ -40,7 +39,6 @@ const initialState: SettingsState = {
   webSocketUrl: 'wss://app.chatwoot.com/cable',
   theme: 'system',
   version: '',
-  pushToken: '',
 };
 export const settingsSlice = createSlice({
   name: 'settings',
@@ -91,14 +89,6 @@ export const settingsSlice = createSlice({
       .addCase(settingsActions.getChatwootVersion.fulfilled, (state, action) => {
         const { version } = action.payload;
         state.version = version;
-      })
-      .addCase(settingsActions.saveDeviceDetails.fulfilled, (state, action) => {
-        if (action?.payload?.fcmToken) {
-          state.pushToken = action.payload.fcmToken;
-        }
-      })
-      .addCase(settingsActions.saveDeviceDetails.rejected, (state, action) => {
-        state.pushToken = '';
       });
   },
 });

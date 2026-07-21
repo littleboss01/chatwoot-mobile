@@ -36,7 +36,10 @@ import { labelActions } from '@/store/label/labelActions';
 import actionCableConnector from '@/utils/actionCable';
 import { setCurrentState } from '@/store/conversation/conversationHeaderSlice';
 import AnalyticsHelper from '@/utils/analyticsUtils';
-import { clearAllDeliveredNotifications } from '@/utils/pushUtils';
+import {
+  clearAllDeliveredNotifications,
+  requestAndroidNotificationPermission,
+} from '@/utils/pushUtils';
 import { dashboardAppActions } from '@/store/dashboard-app/dashboardAppActions';
 import { customAttributeActions } from '@/store/custom-attribute/customAttributeActions';
 import { clearSelection } from '@/store/conversation/conversationSelectedSlice';
@@ -90,7 +93,6 @@ const Tabs = () => {
   useEffect(() => {
     // Here is the place we are loading all the data for the app first time first time or user switches account
     dispatch(authActions.getProfile());
-    dispatch(settingsActions.saveDeviceDetails());
     dispatch(inboxActions.fetchInboxes());
     initActionCable();
     dispatch(labelActions.fetchLabels());
@@ -112,6 +114,7 @@ const Tabs = () => {
   }, []);
 
   const initPushNotifications = useCallback(async () => {
+    await requestAndroidNotificationPermission();
     clearAllDeliveredNotifications();
   }, []);
 

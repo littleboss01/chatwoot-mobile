@@ -1,9 +1,7 @@
-import { Platform } from 'react-native';
+import { AppState, PermissionsAndroid, Platform } from 'react-native';
 import * as Sentry from '@sentry/react-native';
 import notifee, { AndroidImportance } from '@notifee/react-native';
-import { NOTIFICATION_TYPES } from '@/constants';
 import { Notification } from '@/types/Notification';
-import { transformNotification } from '@/utils/camelCaseKeys';
 
 export const clearAllDeliveredNotifications = async () => {
   if (Platform.OS === 'ios') {
@@ -17,72 +15,30 @@ export const updateBadgeCount = async ({ count = 0 }) => {
   }
 };
 
-export const findConversationLinkFromPush = ({
-  notification,
-  installationUrl,
-}: {
-  notification: Notification;
-  installationUrl: string;
-}) => {
-  const { notificationType } = notification;
-
-  if (NOTIFICATION_TYPES.includes(notificationType)) {
-    const { primaryActor, primaryActorId, primaryActorType } = notification;
-    let conversationId = null;
-    if (primaryActorType === 'Conversation') {
-      conversationId = primaryActor.id;
-    } else if (primaryActorType === 'Message') {
-      conversationId = primaryActor.conversationId;
-    }
-    if (conversationId) {
-      const conversationLink = `${installationUrl}/app/accounts/1/conversations/${conversationId}/${primaryActorId}/${primaryActorType}`;
-      return conversationLink;
-    }
-  }
-  return;
-};
-
-interface FCMMessage {
-  data?: {
-    payload?: string;
-    notification?: string;
-  };
-  notification?: object;
-}
-
-export const findNotificationFromFCM = ({ message }: { message: FCMMessage }) => {
-  try {
-    if (message.data?.payload) {
-      const parsedPayload = JSON.parse(message.data.payload);
-      return parsedPayload.data?.notification ?? null;
-    }
-
-    if (message.data?.notification) {
-      return JSON.parse(message.data.notification);
-    }
-  } catch (error) {
-    Sentry.captureException(error);
-  }
-
-  return null;
-};
-
-export const displayAndroidBackgroundNotification = async (message: FCMMessage) => {
-  if (Platform.OS !== 'android' || message.notification) {
+export const requestAndroidNotificationPermission = async () => {
+  const needsPermission = Platform.OS === 'android' && Number(Platform.Version) >= 33;
+  if (!needsPermission) {
     return;
   }
 
-  const notification = findNotificationFromFCM({ message });
-  if (!notification) {
+  const permission = PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS;
+  const granted = await PermissionsAndroid.check(permission);
+  if (!granted) {
+    await PermissionsAndroid.request(permission);
+  }
+};
+
+export const displayAndroidNotification = async (notification: Notification) => {
+  if (Platform.OS !== 'android' || AppState.currentState === 'active') {
+    return;
+  }
+
+  const { pushMessageTitle } = notification;
+  if (!pushMessageTitle) {
     return;
   }
 
   try {
-    const pushMessageTitle = transformNotification(notification).pushMessageTitle;
-    if (!pushMessageTitle) {
-      return;
-    }
-
     const channelId = await notifee.createChannel({
       id: 'chatwoot_messages',
       name: 'Chatwoot messages',

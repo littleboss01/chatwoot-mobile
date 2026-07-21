@@ -9,7 +9,6 @@ import { useAppSelector } from '@/hooks';
 import {
   selectChatwootVersion,
   selectInstallationUrl,
-  selectPushToken,
   selectWebSocketUrl,
 } from '@/store/settings/settingsSelectors';
 
@@ -41,19 +40,12 @@ const DEBUG_ACTIONS: DebugAction[] = [
     label: 'Web Socket URL',
     value: '',
   },
-  {
-    key: 'push_token',
-    label: 'Push Token',
-    value: '',
-  },
 ];
 
 const DebugActionCell = ({ item, index, isLastItem }: DebugActionCellProps) => {
   const installationUrl = useAppSelector(selectInstallationUrl);
   const webSocketUrl = useAppSelector(selectWebSocketUrl);
   const version = useAppSelector(selectChatwootVersion);
-  const pushToken = useAppSelector(selectPushToken);
-
   const hapticSelection = useHaptic();
 
   const handlePress = (item: DebugAction) => {
@@ -73,8 +65,6 @@ const DebugActionCell = ({ item, index, isLastItem }: DebugActionCellProps) => {
         return webSocketUrl;
       case 'chatwoot_version':
         return version;
-      case 'push_token':
-        return pushToken;
       default:
         return '';
     }
