@@ -28,10 +28,6 @@ import Inter50024 from '@/assets/fonts/Inter-500-24.ttf';
 import Inter58024 from '@/assets/fonts/Inter-580-24.ttf';
 import Inter60020 from '@/assets/fonts/Inter-600-20.ttf';
 
-messaging().setBackgroundMessageHandler(async remoteMessage => {
-  console.log('Message handled in the background!', remoteMessage);
-});
-
 export const AppNavigationContainer = () => {
   const [fontsLoaded] = useFonts({
     'Inter-400-20': Inter40020,

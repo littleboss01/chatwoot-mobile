@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { settingsActions } from './settingsActions';
 import * as RootNavigation from '@/utils/navigationUtils';
 import { NotificationSettings } from './settingsTypes';
@@ -54,6 +54,9 @@ export const settingsSlice = createSlice({
       state.localeValue = action.payload;
       state.uiFlags.isLocaleSet = true;
     },
+    setTheme: (state, action: PayloadAction<Theme>) => {
+      state.theme = action.payload;
+    },
   },
   extraReducers: builder => {
     builder
@@ -99,5 +102,5 @@ export const settingsSlice = createSlice({
       });
   },
 });
-export const { resetSettings, setLocale } = settingsSlice.actions;
+export const { resetSettings, setLocale, setTheme } = settingsSlice.actions;
 export default settingsSlice.reducer;

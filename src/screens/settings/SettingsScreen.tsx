@@ -25,7 +25,7 @@ import { clearSearchResults } from '@/store/search/searchSlice';
 import { RecentSearches } from '@/screens/search/utils/recentSearches';
 import i18n from 'i18n';
 import { HELP_URL } from '@/constants/url';
-import { tailwind } from '@/theme';
+import { tailwind, useTheme } from '@/theme';
 
 import {
   BottomSheetBackdrop,
@@ -61,7 +61,7 @@ import {
   selectPushToken,
 } from '@/store/settings/settingsSelectors';
 import { settingsActions } from '@/store/settings/settingsActions';
-import { setLocale } from '@/store/settings/settingsSlice';
+import { setLocale, setTheme } from '@/store/settings/settingsSlice';
 
 import AnalyticsHelper from '@/utils/analyticsUtils';
 import { PROFILE_EVENTS } from '@/constants/analyticsEvents';
@@ -78,6 +78,7 @@ const appVersionDetails = buildNumber ? `${appVersion} (${buildNumber})` : appVe
 const SettingsScreen = () => {
   const navigation = useNavigation();
   const dispatch = useAppDispatch();
+  const { colors, mode, statusBarStyle } = useTheme();
   const availabilityStatus =
     (useSelector(selectCurrentUserAvailability) as AvailabilityStatus) || 'offline';
 
@@ -171,6 +172,10 @@ const SettingsScreen = () => {
     dispatch(setLocale(locale));
   };
 
+  const onChangeTheme = () => {
+    dispatch(setTheme(mode === 'dark' ? 'light' : 'dark'));
+  };
+
   const changeAccount = (accountId: number) => {
     dispatch(clearAllContacts());
     dispatch(clearAllConversations());
@@ -242,6 +247,14 @@ const SettingsScreen = () => {
       onPressListItem: () => languagesModalSheetRef.current?.present(),
     },
     {
+      hasChevron: false,
+      title: i18n.t('SETTINGS.APPEARANCE'),
+      icon: <SwitchIcon />,
+      subtitle: i18n.t(mode === 'dark' ? 'SETTINGS.DARK' : 'SETTINGS.LIGHT'),
+      subtitleType: 'light',
+      onPressListItem: onChangeTheme,
+    },
+    {
       hasChevron: enableAccountSwitch,
       title: i18n.t('SETTINGS.SWITCH_ACCOUNT'),
       icon: <SwitchIcon />,
@@ -275,11 +288,12 @@ const SettingsScreen = () => {
   ];
 
   return (
-    <SafeAreaView style={tailwind.style('flex-1 bg-white font-inter-normal-20')}>
+    <SafeAreaView
+      style={[tailwind.style('flex-1 font-inter-normal-20'), { backgroundColor: colors.background }]}>
       <StatusBar
         translucent
-        backgroundColor={tailwind.color('bg-white')}
-        barStyle={'dark-content'}
+        backgroundColor={colors.background}
+        barStyle={statusBarStyle}
       />
       <SettingsHeader />
       <Animated.ScrollView
@@ -289,18 +303,21 @@ const SettingsScreen = () => {
           <Animated.View>
             <UserAvatar src={avatarUrl} name={name} status={availabilityStatus} />
             <Animated.View
-              style={tailwind.style(
-                'absolute border-[2px] border-white rounded-full -bottom-[2px] right-[10px]',
-              )}></Animated.View>
+              style={[
+                tailwind.style('absolute border-[2px] rounded-full -bottom-[2px] right-[10px]'),
+                { borderColor: colors.avatarBorder },
+              ]}></Animated.View>
           </Animated.View>
           <Animated.View style={tailwind.style('flex flex-col items-center gap-1')}>
-            <Animated.Text style={tailwind.style('text-[22px] font-inter-580-24 text-gray-950')}>
+            <Animated.Text
+              style={[tailwind.style('text-[22px] font-inter-580-24'), { color: colors.textPrimary }]}>
               {name}
             </Animated.Text>
             <Animated.Text
-              style={tailwind.style(
-                'text-[15px] font-inter-420-20 leading-[17.25px] text-gray-900',
-              )}>
+              style={[
+                tailwind.style('text-[15px] font-inter-420-20 leading-[17.25px]'),
+                { color: colors.textSecondary },
+              ]}>
               {email}
             </Animated.Text>
           </Animated.View>
@@ -322,7 +339,7 @@ const SettingsScreen = () => {
         <Pressable
           style={tailwind.style('p-4 items-center')}
           onLongPress={() => debugActionsSheetRef.current?.present()}>
-          <Text style={tailwind.style('text-sm text-gray-700 ')}>
+          <Text style={[tailwind.style('text-sm'), { color: colors.sectionTitle }]}>
             {`${chatwootInstance} ${appVersionDetails}`}
           </Text>
         </Pressable>

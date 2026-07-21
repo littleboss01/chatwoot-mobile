@@ -1,23 +1,18 @@
 import { Platform } from 'react-native';
+import * as Sentry from '@sentry/react-native';
+import notifee, { AndroidImportance } from '@notifee/react-native';
 import { NOTIFICATION_TYPES } from '@/constants';
 import { Notification } from '@/types/Notification';
-
-let notifee: typeof import('@notifee/react-native').default | undefined;
-
-if (Platform.OS === 'ios') {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  notifee = require('@notifee/react-native')
-    .default as typeof import('@notifee/react-native').default;
-}
+import { transformNotification } from '@/utils/camelCaseKeys';
 
 export const clearAllDeliveredNotifications = async () => {
-  if (Platform.OS === 'ios' && notifee) {
+  if (Platform.OS === 'ios') {
     await notifee.cancelAllNotifications();
   }
 };
 
 export const updateBadgeCount = async ({ count = 0 }) => {
-  if (Platform.OS === 'ios' && count >= 0 && notifee) {
+  if (Platform.OS === 'ios' && count >= 0) {
     await notifee.setBadgeCount(count);
   }
 };
@@ -52,18 +47,57 @@ interface FCMMessage {
     payload?: string;
     notification?: string;
   };
+  notification?: object;
 }
 
 export const findNotificationFromFCM = ({ message }: { message: FCMMessage }) => {
-  let notification = null;
-  // FCM HTTP v1
-  if (message?.data?.payload) {
-    const parsedPayload = JSON.parse(message.data.payload);
-    notification = parsedPayload.data.notification;
+  try {
+    if (message.data?.payload) {
+      const parsedPayload = JSON.parse(message.data.payload);
+      return parsedPayload.data?.notification ?? null;
+    }
+
+    if (message.data?.notification) {
+      return JSON.parse(message.data.notification);
+    }
+  } catch (error) {
+    Sentry.captureException(error);
   }
-  // FCM legacy. It will be deprecated soon
-  else {
-    notification = JSON.parse(message.data.notification);
+
+  return null;
+};
+
+export const displayAndroidBackgroundNotification = async (message: FCMMessage) => {
+  if (Platform.OS !== 'android' || message.notification) {
+    return;
   }
-  return notification;
+
+  const notification = findNotificationFromFCM({ message });
+  if (!notification) {
+    return;
+  }
+
+  try {
+    const pushMessageTitle = transformNotification(notification).pushMessageTitle;
+    if (!pushMessageTitle) {
+      return;
+    }
+
+    const channelId = await notifee.createChannel({
+      id: 'chatwoot_messages',
+      name: 'Chatwoot messages',
+      importance: AndroidImportance.HIGH,
+    });
+
+    await notifee.displayNotification({
+      title: 'Chatwoot',
+      body: pushMessageTitle,
+      android: {
+        channelId,
+        pressAction: { id: 'default' },
+      },
+    });
+  } catch (error) {
+    Sentry.captureException(error);
+  }
 };
