@@ -8,6 +8,7 @@
 - 未经主人要求，不执行 build、lint、test 或环境检查命令。
 - Android GitHub Actions 构建不依赖 Google/Firebase 配置。
 - Android GitHub Actions 仅构建 `arm64-v8a` 的 Release APK。
+- Android GitHub Actions 不上传 Sentry Source Map，避免缺少 Sentry 组织与凭据导致打包失败。
 
 ## 已实施
 
