@@ -9,6 +9,7 @@
 - Android GitHub Actions 构建不依赖 Google/Firebase 配置。
 - Android GitHub Actions 通过 ABI Split 仅打包 `arm64-v8a` 的 Release APK。
 - Android GitHub Actions 不上传 Sentry Source Map，避免缺少 Sentry 组织与凭据导致打包失败。
+- Android GitHub Actions 的 Release 构建将 Gradle Daemon 堆设为 4GiB，避免依赖收集阶段内存耗尽。
 
 ## 已实施
 
