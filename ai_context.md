@@ -10,7 +10,7 @@
 - Android GitHub Actions 通过 ABI Split 仅打包 `arm64-v8a` 的 Release APK。
 - Android GitHub Actions 不上传 Sentry Source Map，避免缺少 Sentry 组织与凭据导致打包失败。
 - Android GitHub Actions 的 Release 构建将 Gradle Daemon 堆设为 4GiB，避免依赖收集阶段内存耗尽。
-- Expo 预构建必须在插件列表中登记 `@notifee/react-native`，否则 Notifee 原生模块不会进入 APK。
+- `@notifee/react-native` 9.x 没有 Expo Config Plugin；其 Android 自动链接不得在 `react-native.config.js` 中禁用。
 
 ## 已实施
 
