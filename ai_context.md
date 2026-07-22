@@ -7,6 +7,7 @@
 - 主题必须通过 React Hook 在组件内读取；TypeScript 编译为 JavaScript 不改变 Hook 的运行时行为。
 - 未经主人要求，不执行 build、lint、test 或环境检查命令。
 - Android GitHub Actions 构建不依赖 Google/Firebase 配置。
+- Android GitHub Actions 仅构建 `arm64-v8a` 的 Release APK。
 
 ## 已实施
 

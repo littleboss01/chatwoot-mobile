@@ -2,3 +2,4 @@
 -[x] 增加 换肤,先做 明亮和dark的切换
 -[x] 增加 GitHub Actions 编译并上传 Android 产物
 -[x] 移除 Firebase，改为进程存活时的后台本地通知
+-[x] GitHub Actions 打包 arm64-v8a Release APK
